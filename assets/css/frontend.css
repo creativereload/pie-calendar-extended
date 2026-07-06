@@ -1,0 +1,489 @@
+/**
+ * Pie Calendar Layouts - front-end styles
+ *
+ * Deliberately theme-agnostic: colors/spacing/dimensions are exposed as CSS
+ * custom properties on .pcl-wrap so a site owner can override them in their
+ * own stylesheet without touching this file, e.g.:
+ *
+ *   .pcl-wrap { --pcl-link: #2c5f4f; --pcl-card-radius: 4px; }
+ *
+ * Each rounded element (card, image, date badge, button) has its own base
+ * radius plus four per-corner overrides that default to that base, so a
+ * single value rounds all four corners while an individual corner can be
+ * overridden on its own. Border widths are likewise variable per element.
+ */
+
+.pcl-wrap {
+	--pcl-accent: #3d5a80;
+	--pcl-text: #6b6b70;
+	--pcl-link: #1c1c1e;
+	--pcl-link-hover: var( --pcl-link );
+	--pcl-border: #e4e4e7;
+	--pcl-surface: #ffffff;
+	--pcl-gap: 1.25rem;
+
+	--pcl-button-bg: var( --pcl-accent );
+	--pcl-button-text: #ffffff;
+	--pcl-button-bg-hover: var( --pcl-button-bg );
+	--pcl-button-text-hover: var( --pcl-button-text );
+	--pcl-button-border: transparent;
+	--pcl-button-border-hover: var( --pcl-button-border );
+	--pcl-badge-bg: var( --pcl-accent );
+	--pcl-badge-text: #ffffff;
+	--pcl-badge-border: var( --pcl-border );
+
+	/* Border widths */
+	--pcl-card-border-width: 1px;
+	--pcl-badge-border-width: 1px;
+	--pcl-button-border-width: 2px;
+
+	/* Corner radii — each corner defaults to its element's base radius. */
+	--pcl-card-radius: 10px;
+	--pcl-card-radius-tl: var( --pcl-card-radius );
+	--pcl-card-radius-tr: var( --pcl-card-radius );
+	--pcl-card-radius-br: var( --pcl-card-radius );
+	--pcl-card-radius-bl: var( --pcl-card-radius );
+
+	--pcl-image-radius: 10px;
+	--pcl-image-radius-tl: var( --pcl-image-radius );
+	--pcl-image-radius-tr: var( --pcl-image-radius );
+	--pcl-image-radius-br: var( --pcl-image-radius );
+	--pcl-image-radius-bl: var( --pcl-image-radius );
+
+	--pcl-badge-radius: 10px;
+	--pcl-badge-radius-tl: var( --pcl-badge-radius );
+	--pcl-badge-radius-tr: var( --pcl-badge-radius );
+	--pcl-badge-radius-br: var( --pcl-badge-radius );
+	--pcl-badge-radius-bl: var( --pcl-badge-radius );
+
+	--pcl-button-radius: 8px;
+	--pcl-button-radius-tl: var( --pcl-button-radius );
+	--pcl-button-radius-tr: var( --pcl-button-radius );
+	--pcl-button-radius-br: var( --pcl-button-radius );
+	--pcl-button-radius-bl: var( --pcl-button-radius );
+
+	box-sizing: border-box;
+}
+
+.pcl-wrap *,
+.pcl-wrap *::before,
+.pcl-wrap *::after {
+	box-sizing: inherit;
+}
+
+.pcl-empty {
+	color: var( --pcl-text, #6b6b70 );
+	font-style: italic;
+}
+
+/* ---------- List layout: a larger version of the compact layout,
+   each event in its own bordered card ---------- */
+
+.pcl-layout-list {
+	display: flex;
+	flex-direction: column;
+	gap: var( --pcl-gap );
+}
+
+.pcl-list__row {
+	display: flex;
+	align-items: center;
+	gap: 1.25rem;
+	padding: 1.1rem 1.4rem;
+	background: var( --pcl-surface );
+	border: var( --pcl-card-border-width ) solid var( --pcl-border );
+	border-radius: var( --pcl-card-radius-tl ) var( --pcl-card-radius-tr ) var( --pcl-card-radius-br ) var( --pcl-card-radius-bl );
+}
+
+.pcl-list__content {
+	flex: 1 1 auto;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.6rem;
+}
+
+.pcl-list__top {
+	display: flex;
+	align-items: center;
+	gap: 1.25rem;
+}
+
+.pcl-list__badge {
+	flex: 0 0 auto;
+	width: 5.5rem;
+	height: 5.5rem;
+	border-radius: var( --pcl-badge-radius-tl ) var( --pcl-badge-radius-tr ) var( --pcl-badge-radius-br ) var( --pcl-badge-radius-bl );
+	background: var( --pcl-badge-bg );
+	color: var( --pcl-badge-text );
+	border: var( --pcl-badge-border-width ) solid var( --pcl-badge-border );
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	line-height: 1.1;
+}
+
+.pcl-list__badge-day {
+	font-size: 2.1rem;
+	font-weight: 700;
+}
+
+.pcl-list__badge-month {
+	font-size: 0.95rem;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	opacity: 0.85;
+}
+
+.pcl-list__main {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.pcl-list__title {
+	margin: 0 0 0.3rem;
+	font-size: 1.3rem;
+	font-weight: 700;
+	line-height: 1.3;
+}
+
+.pcl-list__title a {
+	color: var( --pcl-link );
+	text-decoration: underline;
+}
+
+.pcl-list__title a:hover,
+.pcl-list__title a:focus {
+	color: var( --pcl-link-hover );
+	text-decoration: none;
+}
+
+.pcl-list__subtitle {
+	margin: 0;
+	color: var( --pcl-text );
+	font-size: 0.95rem;
+}
+
+.pcl-list__excerpt {
+	margin: 0;
+	color: var( --pcl-text );
+	font-size: 0.95rem;
+	line-height: 1.5;
+}
+
+.pcl-list__thumb {
+	flex: 0 0 auto;
+	align-self: stretch;
+	width: auto;
+	max-height: 9rem;
+	max-width: 100%;
+	aspect-ratio: 16 / 9;
+	border-radius: var( --pcl-image-radius-tl ) var( --pcl-image-radius-tr ) var( --pcl-image-radius-br ) var( --pcl-image-radius-bl );
+	overflow: hidden;
+	display: block;
+	line-height: 0;
+}
+
+.pcl-list__thumb img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+}
+
+.pcl-list__button {
+	flex: 0 0 auto;
+	font-size: 0.85rem;
+	font-weight: 600;
+	color: var( --pcl-button-text ) !important;
+	background: var( --pcl-button-bg ) !important;
+	border: var( --pcl-button-border-width ) solid var( --pcl-button-border );
+	padding: 0.5rem 1rem;
+	border-radius: var( --pcl-button-radius-tl ) var( --pcl-button-radius-tr ) var( --pcl-button-radius-br ) var( --pcl-button-radius-bl );
+	text-decoration: none;
+	white-space: nowrap;
+}
+
+.pcl-list__button:hover,
+.pcl-list__button:focus {
+	color: var( --pcl-button-text-hover ) !important;
+	background: var( --pcl-button-bg-hover ) !important;
+	border-color: var( --pcl-button-border-hover );
+}
+
+@media ( max-width: 720px ) {
+	.pcl-list__thumb {
+		display: none;
+	}
+}
+
+/* ---------- Compact layout ---------- */
+
+.pcl-layout-compact {
+	display: flex;
+	flex-direction: column;
+	gap: 0.4rem;
+	/* Compact rows have no card background by default (just the divider
+	   below) — only apply one if a card background color is explicitly
+	   set, which overrides this via an inline style on the same element. */
+	--pcl-surface: transparent;
+}
+
+.pcl-compact__row {
+	display: flex;
+	align-items: center;
+	gap: 0.85rem;
+	padding: 0.55rem 0.4rem;
+	background: var( --pcl-surface );
+}
+
+.pcl-compact__badge {
+	flex: 0 0 auto;
+	width: 4rem;
+	height: 4rem;
+	border-radius: var( --pcl-badge-radius-tl ) var( --pcl-badge-radius-tr ) var( --pcl-badge-radius-br ) var( --pcl-badge-radius-bl );
+	background: var( --pcl-badge-bg );
+	color: var( --pcl-badge-text );
+	border: var( --pcl-badge-border-width ) solid var( --pcl-badge-border );
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	line-height: 1.1;
+}
+
+.pcl-compact__badge-month {
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	opacity: 0.85;
+}
+
+.pcl-compact__badge-day {
+	font-size: 1.25rem;
+	font-weight: 700;
+}
+
+.pcl-compact__thumb {
+	flex: 0 0 auto;
+	width: 4rem;
+	height: 4rem;
+	border-radius: var( --pcl-image-radius-tl ) var( --pcl-image-radius-tr ) var( --pcl-image-radius-br ) var( --pcl-image-radius-bl );
+	overflow: hidden;
+	display: block;
+	line-height: 0;
+}
+
+.pcl-compact__thumb img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+}
+
+.pcl-compact__body {
+	flex: 1;
+	min-width: 0;
+}
+
+.pcl-compact__title {
+	margin: 0;
+	font-size: 0.98rem;
+	line-height: 1.35;
+}
+
+.pcl-compact__title a {
+	color: var( --pcl-link );
+	text-decoration: underline;
+}
+
+.pcl-compact__title a:hover,
+.pcl-compact__title a:focus {
+	color: var( --pcl-link-hover );
+	text-decoration: none;
+}
+
+.pcl-compact__time {
+	display: block;
+	font-size: 0.78rem;
+	color: var( --pcl-text );
+	margin: 0.1rem 0 0;
+}
+
+.pcl-compact__excerpt {
+	margin: 0.05rem 0 0;
+	font-size: 0.85rem;
+	color: var( --pcl-text );
+	line-height: 1.4;
+	/* keep true to "compact": clip to two lines rather than growing the row */
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+
+.pcl-compact__button {
+	flex: 0 0 auto;
+	font-size: 0.78rem;
+	font-weight: 600;
+	color: var( --pcl-button-text ) !important;
+	background: var( --pcl-button-bg ) !important;
+	border: var( --pcl-button-border-width ) solid var( --pcl-button-border );
+	padding: 0.4rem 0.75rem;
+	border-radius: var( --pcl-button-radius-tl ) var( --pcl-button-radius-tr ) var( --pcl-button-radius-br ) var( --pcl-button-radius-bl );
+	text-decoration: none;
+	white-space: nowrap;
+}
+
+.pcl-compact__button:hover,
+.pcl-compact__button:focus {
+	color: var( --pcl-button-text-hover ) !important;
+	background: var( --pcl-button-bg-hover ) !important;
+	border-color: var( --pcl-button-border-hover );
+}
+
+@media ( max-width: 480px ) {
+	.pcl-compact__button {
+		display: none;
+	}
+}
+
+/* ---------- Column layout: a responsive grid of large cards ---------- */
+
+.pcl-layout-column {
+	display: grid;
+	grid-template-columns: repeat( var( --pcl-columns, 3 ), 1fr );
+	gap: var( --pcl-gap );
+}
+
+@media ( max-width: 900px ) {
+	.pcl-layout-column {
+		grid-template-columns: repeat( 2, 1fr );
+	}
+}
+
+@media ( max-width: 600px ) {
+	.pcl-layout-column {
+		grid-template-columns: 1fr;
+	}
+}
+
+.pcl-column__card {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	background: var( --pcl-surface );
+	border: var( --pcl-card-border-width ) solid var( --pcl-border );
+	border-radius: var( --pcl-card-radius-tl ) var( --pcl-card-radius-tr ) var( --pcl-card-radius-br ) var( --pcl-card-radius-bl );
+	padding: 1.5rem;
+	overflow: hidden;
+}
+
+.pcl-column__media {
+	position: relative;
+	line-height: 0;
+}
+
+.pcl-column__thumb {
+	display: block;
+	width: 100%;
+	aspect-ratio: 16 / 9;
+	border-radius: var( --pcl-image-radius-tl ) var( --pcl-image-radius-tr ) var( --pcl-image-radius-br ) var( --pcl-image-radius-bl );
+	overflow: hidden;
+}
+
+.pcl-column__thumb img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+}
+
+.pcl-column__badge {
+	flex: 0 0 auto;
+	width: 4.5rem;
+	height: 4.5rem;
+	border-radius: var( --pcl-badge-radius-tl ) var( --pcl-badge-radius-tr ) var( --pcl-badge-radius-br ) var( --pcl-badge-radius-bl );
+	background: var( --pcl-badge-bg );
+	color: var( --pcl-badge-text );
+	border: var( --pcl-badge-border-width ) solid var( --pcl-badge-border );
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	line-height: 1.1;
+}
+
+.pcl-column__media .pcl-column__badge {
+	position: absolute;
+	top: 0.75rem;
+	left: 0.75rem;
+	box-shadow: 0 2px 8px rgba( 0, 0, 0, 0.25 );
+}
+
+.pcl-column__badge-day {
+	font-size: 1.7rem;
+	font-weight: 700;
+}
+
+.pcl-column__badge-month {
+	font-size: 0.8rem;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	opacity: 0.85;
+}
+
+.pcl-column__title {
+	margin: 0;
+	font-size: 1.3rem;
+	font-weight: 800;
+	line-height: 1.3;
+}
+
+.pcl-column__title a {
+	color: var( --pcl-link );
+	text-decoration: underline;
+}
+
+.pcl-column__title a:hover,
+.pcl-column__title a:focus {
+	color: var( --pcl-link-hover );
+	text-decoration: none;
+}
+
+.pcl-column__subtitle {
+	margin: 0;
+	color: var( --pcl-text );
+	font-size: 1rem;
+}
+
+.pcl-column__excerpt {
+	margin: 0;
+	color: var( --pcl-text );
+	font-size: 0.95rem;
+	line-height: 1.5;
+}
+
+.pcl-column__button {
+	align-self: flex-start;
+	margin-top: auto;
+	font-size: 0.9rem;
+	font-weight: 700;
+	color: var( --pcl-button-text ) !important;
+	background: var( --pcl-button-bg ) !important;
+	border: var( --pcl-button-border-width ) solid var( --pcl-button-border );
+	padding: 0.55rem 1.4rem;
+	border-radius: var( --pcl-button-radius-tl ) var( --pcl-button-radius-tr ) var( --pcl-button-radius-br ) var( --pcl-button-radius-bl );
+	text-decoration: none;
+	white-space: nowrap;
+}
+
+.pcl-column__button:hover,
+.pcl-column__button:focus {
+	color: var( --pcl-button-text-hover ) !important;
+	background: var( --pcl-button-bg-hover ) !important;
+	border-color: var( --pcl-button-border-hover );
+}

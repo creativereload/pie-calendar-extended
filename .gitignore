@@ -1,0 +1,16 @@
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/
+
+# Build artifacts / release archives
+*.zip
+/build/
+/dist/
+
+# Dependencies (not used yet, but safe defaults)
+/node_modules/
+/vendor/
