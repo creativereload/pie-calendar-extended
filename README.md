@@ -47,6 +47,9 @@ Layout shortcode examples:
 [piecal_layouts post_id="425" time="upcoming"]
 ```
 
+See **[SHORTCODE.md](SHORTCODE.md)** for the full list of `[piecal_layouts]`
+attributes, accepted values, and more examples.
+
 Filtering works automatically on any Pie Calendar rendered on the page. To
 target custom taxonomies instead of the default `category` and `post_tag`, use
 the `pcf_category_taxonomy` and `pcf_tag_taxonomy` filters.
