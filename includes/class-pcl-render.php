@@ -129,7 +129,7 @@ class PCL_Render {
 			$out .= '</div>';
 
 			$out .= '<div class="pcl-list__main">';
-			$out .= '<h3 class="pcl-list__title"><a href="' . esc_url( $permalink ) . '">' . esc_html( $title ) . '</a></h3>';
+			$out .= '<' . $atts['heading_level'] . ' class="pcl-list__title"><a href="' . esc_url( $permalink ) . '">' . esc_html( $title ) . '</a></' . $atts['heading_level'] . '>';
 			if ( $subtitle ) {
 				$out .= '<p class="pcl-list__subtitle">' . esc_html( $subtitle ) . '</p>';
 			}
@@ -188,7 +188,7 @@ class PCL_Render {
 			}
 
 			$out .= '<div class="pcl-compact__body">';
-			$out .= '<h3 class="pcl-compact__title"><a href="' . esc_url( $permalink ) . '">' . esc_html( $title ) . '</a></h3>';
+			$out .= '<' . $atts['heading_level'] . ' class="pcl-compact__title"><a href="' . esc_url( $permalink ) . '">' . esc_html( $title ) . '</a></' . $atts['heading_level'] . '>';
 
 			$subtitle = self::format_event_subtitle( $event );
 			if ( $subtitle ) {
@@ -245,7 +245,7 @@ class PCL_Render {
 				$out .= $badge_markup;
 			}
 
-			$out .= '<h3 class="pcl-column__title"><a href="' . esc_url( $permalink ) . '">' . esc_html( $title ) . '</a></h3>';
+			$out .= '<' . $atts['heading_level'] . ' class="pcl-column__title"><a href="' . esc_url( $permalink ) . '">' . esc_html( $title ) . '</a></' . $atts['heading_level'] . '>';
 
 			if ( $subtitle ) {
 				$out .= '<p class="pcl-column__subtitle">' . esc_html( $subtitle ) . '</p>';

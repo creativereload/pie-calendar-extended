@@ -57,6 +57,7 @@ class PCL_Shortcode {
 				'date_format'        => '',
 				'link_text'          => __( 'View Event', 'pie-calendar-extended' ),
 				'show_button'        => 'yes',
+				'heading_level'      => 'h3',
 				'columns'              => 3,
 				'card_border_width'    => '',
 				'badge_border_width'   => '',
@@ -130,6 +131,7 @@ class PCL_Shortcode {
 		$atts['post_type']          = sanitize_key( $atts['post_type'] );
 		$atts['post_id']            = absint( $atts['post_id'] );
 		$atts['layout']              = sanitize_key( $atts['layout'] );
+		$atts['heading_level']       = self::sanitize_heading_level( $atts['heading_level'] );
 		$atts['time']                = sanitize_key( $atts['time'] );
 		$atts['order']               = ( 'DESC' === strtoupper( $atts['order'] ) ) ? 'DESC' : 'ASC';
 		$atts['link_text']           = sanitize_text_field( $atts['link_text'] );
@@ -192,6 +194,16 @@ class PCL_Shortcode {
 		$pixels = max( 0, min( 60, intval( $value ) ) );
 
 		return $pixels . 'px';
+	}
+
+	/**
+	 * Restrict the event-title heading level to h2–h6, falling back to h3.
+	 * Keeps the value safe to interpolate directly into a tag name.
+	 */
+	protected static function sanitize_heading_level( $value ) {
+		$value = strtolower( trim( (string) $value ) );
+
+		return in_array( $value, array( 'h2', 'h3', 'h4', 'h5', 'h6' ), true ) ? $value : 'h3';
 	}
 
 	/**
