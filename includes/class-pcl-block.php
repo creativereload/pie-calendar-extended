@@ -96,6 +96,10 @@ class PCL_Block {
 						'type'    => 'boolean',
 						'default' => true,
 					),
+					'headingLevel'  => array(
+						'type'    => 'string',
+						'default' => 'h3',
+					),
 					'columns'       => array(
 						'type'    => 'number',
 						'default' => 3,
@@ -197,6 +201,7 @@ class PCL_Block {
 			'excerpt_length' => $block_attrs['excerptLength'] ?? 20,
 			'link_text'      => $block_attrs['linkText'] ?? __( 'View Event', 'pie-calendar-extended' ),
 			'show_button'        => ! isset( $block_attrs['showButton'] ) || ! empty( $block_attrs['showButton'] ) ? 'yes' : 'no',
+			'heading_level'      => $block_attrs['headingLevel'] ?? 'h3',
 			'columns'            => $block_attrs['columns'] ?? 3,
 			'card_border_width'    => $block_attrs['cardBorderWidth'] ?? '',
 			'badge_border_width'   => $block_attrs['badgeBorderWidth'] ?? '',

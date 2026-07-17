@@ -152,6 +152,7 @@
 			excerptLength: { type: 'number', default: 20 },
 			linkText: { type: 'string', default: __( 'View Event', 'pie-calendar-layouts' ) },
 			showButton: { type: 'boolean', default: true },
+			headingLevel: { type: 'string', default: 'h3' },
 			columns: { type: 'number', default: 3 },
 			cardBorderWidth: { type: 'number' },
 			badgeBorderWidth: { type: 'number' },
@@ -237,7 +238,21 @@
 								onChange: function ( value ) {
 									setAttributes( { columns: parseInt( value, 10 ) } );
 								},
-							} )
+							} ),
+						el( SelectControl, {
+							label: __( 'Title heading level', 'pie-calendar-layouts' ),
+							value: attributes.headingLevel || 'h3',
+							options: [
+								{ label: 'H2', value: 'h2' },
+								{ label: 'H3', value: 'h3' },
+								{ label: 'H4', value: 'h4' },
+								{ label: 'H5', value: 'h5' },
+								{ label: 'H6', value: 'h6' },
+							],
+							onChange: function ( value ) {
+								setAttributes( { headingLevel: value } );
+							},
+						} )
 					),
 					el(
 						PanelBody,
