@@ -123,15 +123,12 @@ class PCL_Render {
 
 			$out .= '<div class="pcl-list__top">';
 
-			$out .= '<div class="pcl-list__badge">';
-			$out .= '<span class="pcl-list__badge-month">' . esc_html( $badge['month'] ) . '</span>';
-			$out .= '<span class="pcl-list__badge-day">' . esc_html( $badge['day'] ) . '</span>';
-			$out .= '</div>';
+			$out .= self::render_badge( $event, 'pcl-list__badge', $badge );
 
 			$out .= '<div class="pcl-list__main">';
 			$out .= '<' . $atts['heading_level'] . ' class="pcl-list__title"><a href="' . esc_url( $permalink ) . '">' . esc_html( $title ) . '</a></' . $atts['heading_level'] . '>';
 			if ( $subtitle ) {
-				$out .= '<p class="pcl-list__subtitle">' . esc_html( $subtitle ) . '</p>';
+				$out .= '<p class="pcl-list__subtitle">' . self::subtitle_html( $event ) . '</p>';
 			}
 			$out .= '</div>'; // .pcl-list__main
 
@@ -176,10 +173,7 @@ class PCL_Render {
 
 			$out .= '<div class="pcl-compact__row">';
 
-			$out .= '<div class="pcl-compact__badge">';
-			$out .= '<span class="pcl-compact__badge-month">' . esc_html( $badge['month'] ) . '</span>';
-			$out .= '<span class="pcl-compact__badge-day">' . esc_html( $badge['day'] ) . '</span>';
-			$out .= '</div>';
+			$out .= self::render_badge( $event, 'pcl-compact__badge', $badge );
 
 			if ( $atts['show_image'] && has_post_thumbnail( $event ) ) {
 				$out .= '<a class="pcl-compact__thumb" href="' . esc_url( $permalink ) . '" tabindex="-1" aria-hidden="true">';
@@ -192,7 +186,7 @@ class PCL_Render {
 
 			$subtitle = self::format_event_subtitle( $event );
 			if ( $subtitle ) {
-				$out .= '<p class="pcl-compact__time">' . esc_html( $subtitle ) . '</p>';
+				$out .= '<p class="pcl-compact__time">' . self::subtitle_html( $event ) . '</p>';
 			}
 
 			if ( $atts['show_excerpt'] ) {
@@ -229,10 +223,7 @@ class PCL_Render {
 
 			$out .= '<div class="pcl-column__card">';
 
-			$badge_markup  = '<div class="pcl-column__badge">';
-			$badge_markup .= '<span class="pcl-column__badge-month">' . esc_html( $badge['month'] ) . '</span>';
-			$badge_markup .= '<span class="pcl-column__badge-day">' . esc_html( $badge['day'] ) . '</span>';
-			$badge_markup .= '</div>'; // .pcl-column__badge
+			$badge_markup = self::render_badge( $event, 'pcl-column__badge', $badge );
 
 			if ( $atts['show_image'] && has_post_thumbnail( $event ) ) {
 				$out .= '<div class="pcl-column__media">';
@@ -248,7 +239,7 @@ class PCL_Render {
 			$out .= '<' . $atts['heading_level'] . ' class="pcl-column__title"><a href="' . esc_url( $permalink ) . '">' . esc_html( $title ) . '</a></' . $atts['heading_level'] . '>';
 
 			if ( $subtitle ) {
-				$out .= '<p class="pcl-column__subtitle">' . esc_html( $subtitle ) . '</p>';
+				$out .= '<p class="pcl-column__subtitle">' . self::subtitle_html( $event ) . '</p>';
 			}
 
 			if ( $atts['show_excerpt'] ) {
@@ -341,6 +332,76 @@ class PCL_Render {
 			$weekday,
 			$start_label
 		);
+	}
+
+	/**
+	 * Machine-readable value for a <time datetime> attribute, taken verbatim
+	 * from the stored local start (no timezone reinterpretation): "Y-m-d" for
+	 * all-day events, "Y-m-dTH:i" otherwise. Returns '' if no start.
+	 */
+	protected static function datetime_attr( $event ) {
+		if ( empty( $event->pcl_start ) ) {
+			return '';
+		}
+
+		$start = str_replace( ' ', 'T', trim( (string) $event->pcl_start ) );
+
+		return ! empty( $event->pcl_all_day ) ? substr( $start, 0, 10 ) : substr( $start, 0, 16 );
+	}
+
+	/**
+	 * Full, localized date for screen readers, e.g. "Wednesday, September 2,
+	 * 2026" — announced in place of the abbreviated badge.
+	 */
+	protected static function full_date_label( $event ) {
+		if ( empty( $event->pcl_start ) ) {
+			return '';
+		}
+
+		$ts = strtotime( $event->pcl_start );
+
+		return $ts ? date_i18n( 'l, F j, Y', $ts ) : '';
+	}
+
+	/**
+	 * Render the date badge as a semantic <time> element. The abbreviated
+	 * month/day spans are hidden from assistive tech (aria-hidden) in favor of
+	 * a visually hidden full-date label, so screen readers announce a single
+	 * clean date instead of "SEP" then "02".
+	 */
+	protected static function render_badge( $event, $class_base, $badge ) {
+		$datetime = self::datetime_attr( $event );
+		$sr_label = self::full_date_label( $event );
+
+		$html  = '<time class="' . esc_attr( $class_base ) . '"';
+		$html .= '' !== $datetime ? ' datetime="' . esc_attr( $datetime ) . '"' : '';
+		$html .= '>';
+		$html .= '<span class="' . esc_attr( $class_base . '-month' ) . '" aria-hidden="true">' . esc_html( $badge['month'] ) . '</span>';
+		$html .= '<span class="' . esc_attr( $class_base . '-day' ) . '" aria-hidden="true">' . esc_html( $badge['day'] ) . '</span>';
+		if ( '' !== $sr_label ) {
+			$html .= '<span class="pcl-sr-only">' . esc_html( $sr_label ) . '</span>';
+		}
+		$html .= '</time>';
+
+		return $html;
+	}
+
+	/**
+	 * The weekday/time subtitle wrapped in a <time datetime> element, so the
+	 * date is machine-readable. Returns '' when there's no date.
+	 */
+	protected static function subtitle_html( $event ) {
+		$label = self::format_event_subtitle( $event );
+		if ( '' === $label ) {
+			return '';
+		}
+
+		$datetime = self::datetime_attr( $event );
+		if ( '' === $datetime ) {
+			return esc_html( $label );
+		}
+
+		return '<time datetime="' . esc_attr( $datetime ) . '">' . esc_html( $label ) . '</time>';
 	}
 
 	/**
