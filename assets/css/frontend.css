@@ -212,6 +212,7 @@
 	color: var( --pcl-button-text-hover ) !important;
 	background: var( --pcl-button-bg-hover ) !important;
 	border-color: var( --pcl-button-border-hover );
+	text-decoration: none !important;
 }
 
 @media ( max-width: 720px ) {
@@ -343,6 +344,7 @@
 	color: var( --pcl-button-text-hover ) !important;
 	background: var( --pcl-button-bg-hover ) !important;
 	border-color: var( --pcl-button-border-hover );
+	text-decoration: none !important;
 }
 
 @media ( max-width: 480px ) {
@@ -487,6 +489,7 @@
 	color: var( --pcl-button-text-hover ) !important;
 	background: var( --pcl-button-bg-hover ) !important;
 	border-color: var( --pcl-button-border-hover );
+	text-decoration: none !important;
 }
 
 /* "Load more" pagination. */
