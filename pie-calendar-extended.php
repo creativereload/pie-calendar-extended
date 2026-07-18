@@ -41,6 +41,7 @@ require_once PCE_PATH . 'includes/class-pcl-render.php';
 require_once PCE_PATH . 'includes/class-pcl-shortcode.php';
 require_once PCE_PATH . 'includes/class-pcl-block.php';
 require_once PCE_PATH . 'includes/class-pcl-customizer.php';
+require_once PCE_PATH . 'includes/class-pcl-ajax.php';
 require_once PCE_PATH . 'includes/class-pce-filter.php';
 
 /**
@@ -86,6 +87,7 @@ final class Pie_Calendar_Extended {
 		new PCL_Shortcode();
 		new PCL_Block();
 		new PCL_Customizer();
+		new PCL_Ajax();
 
 		// Filter feature set (Category/Tag controls on the native calendar).
 		new PCE_Filter();

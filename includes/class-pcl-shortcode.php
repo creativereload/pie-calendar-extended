@@ -23,15 +23,26 @@ class PCL_Shortcode {
 	public function render( $atts ) {
 		$atts = self::normalize_atts( $atts );
 
-		$events = PCL_Query::get_events(
-			array(
-				'post_type' => $atts['post_type'],
-				'post_id'   => $atts['post_id'],
-				'limit'     => $atts['limit'],
-				'time'      => $atts['time'],
-				'order'     => $atts['order'],
-			)
+		$query_args = array(
+			'post_type' => $atts['post_type'],
+			'post_id'   => $atts['post_id'],
+			'limit'     => $atts['limit'],
+			'time'      => $atts['time'],
+			'order'     => $atts['order'],
 		);
+
+		// With pagination on, `limit` is the page size: render page one plus a
+		// "Load more" button that fetches subsequent pages via AJAX.
+		if ( $atts['pagination'] ) {
+			$query_args['per_page'] = $atts['limit'];
+			$query_args['page']     = 1;
+
+			$result = PCL_Query::get_events_page( $query_args );
+
+			return PCL_Render::render( $result['events'], $atts, array( 'has_more' => $result['has_more'] ) );
+		}
+
+		$events = PCL_Query::get_events( $query_args );
 
 		return PCL_Render::render( $events, $atts );
 	}
@@ -51,6 +62,7 @@ class PCL_Shortcode {
 				'limit'              => 10,
 				'time'               => 'upcoming',
 				'order'              => 'ASC',
+				'pagination'         => 'no',
 				'show_image'         => 'yes',
 				'show_excerpt'       => 'yes',
 				'excerpt_length'     => 20,
@@ -102,6 +114,7 @@ class PCL_Shortcode {
 		$atts['show_image']         = self::to_bool( $atts['show_image'] );
 		$atts['show_excerpt']       = self::to_bool( $atts['show_excerpt'] );
 		$atts['show_button']        = self::to_bool( $atts['show_button'] );
+		$atts['pagination']         = self::to_bool( $atts['pagination'] );
 		$atts['columns']            = max( 1, min( 3, intval( $atts['columns'] ) ) );
 
 		foreach ( array(

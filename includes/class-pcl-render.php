@@ -10,13 +10,37 @@ if ( ! defined( 'ABSPATH' ) ) {
 class PCL_Render {
 
 	/**
+	 * Query/render attributes echoed into the "Load more" button so the AJAX
+	 * handler can reproduce the same query and item markup. Re-sanitized
+	 * server-side on every request — never trusted as-is.
+	 */
+	const AJAX_ATT_KEYS = array(
+		'layout',
+		'post_type',
+		'post_id',
+		'limit',
+		'time',
+		'order',
+		'show_image',
+		'show_excerpt',
+		'excerpt_length',
+		'link_text',
+		'show_button',
+		'heading_level',
+		'columns',
+		'date_format',
+	);
+
+	/**
 	 * Build the full markup for a set of events.
 	 *
-	 * @param WP_Post[] $events Events from PCL_Query::get_events().
-	 * @param array     $atts   Normalized display attributes.
+	 * @param WP_Post[] $events     Events from PCL_Query::get_events().
+	 * @param array     $atts       Normalized display attributes.
+	 * @param array|null $pagination Optional { has_more: bool } to append a
+	 *                               "Load more" button for paginated output.
 	 * @return string HTML.
 	 */
-	public static function render( $events, $atts ) {
+	public static function render( $events, $atts, $pagination = null ) {
 		wp_enqueue_style( 'pcl-frontend' );
 		wp_enqueue_script( 'pcl-frontend' );
 
@@ -38,8 +62,45 @@ class PCL_Render {
 		}
 
 		$instance_id = 'pcl-' . wp_unique_id();
+		$html        = self::$method( $events, $atts, $instance_id );
 
-		return self::$method( $events, $atts, $instance_id );
+		if ( is_array( $pagination ) ) {
+			$html = '<div class="pcl-paginated"' . self::style_attr( $atts ) . '>'
+				. $html
+				. self::load_more_button( $atts, $instance_id, 1, ! empty( $pagination['has_more'] ) )
+				. '</div>';
+		}
+
+		return $html;
+	}
+
+	/**
+	 * The "Load more" button for paginated output. Carries everything the AJAX
+	 * handler needs: the target wrap id, the current page, a nonce, the
+	 * admin-ajax URL, and the query/render attributes. Returns '' when there is
+	 * no further page.
+	 */
+	protected static function load_more_button( $atts, $instance_id, $current_page, $has_more ) {
+		if ( ! $has_more ) {
+			return '';
+		}
+
+		$ajax_atts = array();
+		foreach ( self::AJAX_ATT_KEYS as $key ) {
+			if ( isset( $atts[ $key ] ) ) {
+				$ajax_atts[ $key ] = $atts[ $key ];
+			}
+		}
+
+		return sprintf(
+			'<button type="button" class="pcl-load-more" data-target="%1$s" data-page="%2$d" data-nonce="%3$s" data-ajaxurl="%4$s" data-atts="%5$s">%6$s</button>',
+			esc_attr( $instance_id ),
+			(int) $current_page,
+			esc_attr( wp_create_nonce( 'pcl_load_more' ) ),
+			esc_url( admin_url( 'admin-ajax.php' ) ),
+			esc_attr( (string) wp_json_encode( $ajax_atts ) ),
+			esc_html__( 'Load more', 'pie-calendar-extended' )
+		);
 	}
 
 	/**

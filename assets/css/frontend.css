@@ -13,7 +13,8 @@
  * overridden on its own. Border widths are likewise variable per element.
  */
 
-.pcl-wrap {
+.pcl-wrap,
+.pcl-paginated {
 	--pcl-accent: #3d5a80;
 	--pcl-text: #6b6b70;
 	--pcl-link: #1c1c1e;
@@ -486,6 +487,31 @@
 	color: var( --pcl-button-text-hover ) !important;
 	background: var( --pcl-button-bg-hover ) !important;
 	border-color: var( --pcl-button-border-hover );
+}
+
+/* "Load more" pagination. */
+.pcl-load-more {
+	display: block;
+	margin: 1.5rem auto 0;
+	padding: 0.6em 1.4em;
+	font: inherit;
+	cursor: pointer;
+	color: var( --pcl-button-text );
+	background: var( --pcl-button-bg );
+	border: var( --pcl-button-border-width ) solid var( --pcl-button-border );
+	border-radius: var( --pcl-button-radius-tl ) var( --pcl-button-radius-tr ) var( --pcl-button-radius-br ) var( --pcl-button-radius-bl );
+}
+
+.pcl-load-more:hover,
+.pcl-load-more:focus {
+	color: var( --pcl-button-text-hover );
+	background: var( --pcl-button-bg-hover );
+	border-color: var( --pcl-button-border-hover );
+}
+
+.pcl-load-more.is-loading {
+	opacity: 0.6;
+	cursor: progress;
 }
 
 /* Visually hidden, but available to screen readers (e.g. the full date label
