@@ -7,7 +7,7 @@ Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
 Requires Plugins: pie-calendar
-Stable tag: 0.0.3
+Stable tag: 0.0.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,6 +73,9 @@ standalone plugin, deactivate them before activating this one. The
 keep working.
 
 == Changelog ==
+
+= 0.0.4 =
+* Added optional "Load more" pagination to [piecal_layouts] and the block (a new `pagination` attribute / "Enable load-more pagination" toggle). When enabled, the event count becomes the page size and a button appends the next batch via AJAX.
 
 = 0.0.3 =
 * Recurrence occurrences now link with pass-through occurrence data (eventstart/eventend/timezone), matching Pie Calendar's native calendar links, so `[piecal_info]` on the target page shows the clicked occurrence's date instead of the base event's. The original occurrence keeps its clean permalink.

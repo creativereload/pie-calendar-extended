@@ -32,6 +32,7 @@ Calendar Layouts* Gutenberg block.
 | `show_image` | `yes` | `yes`/`no`, `true`/`false`, `1`/`0` | Show the event's featured image. |
 | `show_excerpt` | `yes` | `yes`/`no`, `true`/`false`, `1`/`0` | Show the event excerpt. |
 | `show_button` | `yes` | `yes`/`no`, `true`/`false`, `1`/`0` | Show the "View Event" button/link. |
+| `pagination` | `no` | `yes`/`no`, `true`/`false`, `1`/`0` | Show a "Load more" button that appends the next batch via AJAX. **When on, `limit` becomes the page size** (events per batch). |
 | `excerpt_length` | `20` | integer | Excerpt length in words (when `show_excerpt` is on). |
 | `link_text` | `View Event` | text | Label for the event button/link. |
 | `date_format` | *(empty)* | [PHP date format](https://www.php.net/manual/en/datetime.format.php) | Override the date display. Empty = site's default format. |
@@ -104,6 +105,12 @@ Past events, newest first, custom button text and date format:
 
 ```
 [piecal_layouts time="past" order="DESC" link_text="Recap" date_format="M j, Y"]
+```
+
+Paginated list, 5 per "Load more" batch:
+
+```
+[piecal_layouts pagination="yes" limit="5"]
 ```
 
 Branded card with rounded top corners:

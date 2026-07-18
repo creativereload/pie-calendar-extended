@@ -3,7 +3,7 @@
  * Plugin Name:       Pie Calendar Extended
  * Plugin URI:        https://creativereload.com
  * Description:       Extends Pie Calendar with extra display layouts (list/compact/column, via a shortcode and Gutenberg block) and Category/Tag filter controls on the native calendar.
- * Version:           0.0.3
+ * Version:           0.0.4
  * Requires PHP:      7.4
  * Requires at least: 6.0
  * Requires Plugins:  pie-calendar
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'PCE_VERSION', '0.0.3' );
+define( 'PCE_VERSION', '0.0.4' );
 define( 'PCE_FILE', __FILE__ );
 define( 'PCE_PATH', plugin_dir_path( __FILE__ ) );
 define( 'PCE_URL', plugin_dir_url( __FILE__ ) );
