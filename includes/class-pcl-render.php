@@ -113,7 +113,7 @@ class PCL_Render {
 
 		foreach ( $events as $event ) {
 			$title     = get_the_title( $event );
-			$permalink = get_permalink( $event );
+			$permalink = self::event_permalink( $event );
 			$badge     = self::get_date_badge( $event );
 			$subtitle  = self::format_event_subtitle( $event );
 
@@ -168,7 +168,7 @@ class PCL_Render {
 
 		foreach ( $events as $event ) {
 			$title     = get_the_title( $event );
-			$permalink = get_permalink( $event );
+			$permalink = self::event_permalink( $event );
 			$badge     = self::get_date_badge( $event );
 
 			$out .= '<div class="pcl-compact__row">';
@@ -217,7 +217,7 @@ class PCL_Render {
 
 		foreach ( $events as $event ) {
 			$title     = get_the_title( $event );
-			$permalink = get_permalink( $event );
+			$permalink = self::event_permalink( $event );
 			$badge     = self::get_date_badge( $event );
 			$subtitle  = self::format_event_subtitle( $event );
 
@@ -402,6 +402,52 @@ class PCL_Render {
 		}
 
 		return '<time datetime="' . esc_attr( $datetime ) . '">' . esc_html( $label ) . '</time>';
+	}
+
+	/**
+	 * Event permalink, augmented with pass-through occurrence data
+	 * (eventstart/eventend/timezone) for recurrence occurrences so Pie
+	 * Calendar's [piecal_info] shows the clicked occurrence's date instead of
+	 * the base event's. The original occurrence links to its clean permalink,
+	 * matching Pie Calendar's own behavior; only recurrences carry the params.
+	 *
+	 * The params mirror Pie Calendar's native calendar links: eventstart/
+	 * eventend as Unix timestamps and the site timezone name.
+	 */
+	protected static function event_permalink( $event ) {
+		$permalink = get_permalink( $event );
+
+		if ( empty( $event->pcl_start ) ) {
+			return $permalink;
+		}
+
+		$start_meta_key = apply_filters( 'piecal_start_date_meta_key', '_piecal_start_date' );
+		$base_start     = get_post_meta( $event->ID, $start_meta_key, true );
+
+		// The original occurrence matches the stored start exactly; recurrence
+		// occurrences have a different start and need the pass-through data.
+		if ( (string) $event->pcl_start === (string) $base_start ) {
+			return $permalink;
+		}
+
+		$tz    = wp_timezone();
+		$start = date_create( (string) $event->pcl_start, $tz );
+		if ( ! $start ) {
+			return $permalink;
+		}
+
+		$args = array( 'eventstart' => $start->getTimestamp() );
+
+		if ( ! empty( $event->pcl_end ) ) {
+			$end = date_create( (string) $event->pcl_end, $tz );
+			if ( $end ) {
+				$args['eventend'] = $end->getTimestamp();
+			}
+		}
+
+		$args['timezone'] = wp_timezone_string();
+
+		return add_query_arg( $args, $permalink );
 	}
 
 	/**
