@@ -239,9 +239,10 @@ class PCL_Query {
 
 			$exclusions = $global_exclusions;
 
+			// EXDATE entries only mark blackout ranges — collect them so they
+			// can be applied (to the base occurrence and, for the fallback
+			// path, to expanded occurrences) below.
 			if ( is_array( $rsets ) ) {
-				// EXDATE entries only mark blackout ranges — collect them
-				// first so they can be applied to RDATE/RRULE results below.
 				foreach ( $rsets as $rset ) {
 					if ( ( $rset['type'] ?? '' ) === 'EXDATE' ) {
 						$exclusion = self::parse_exdate_range( $rset['EXDATE'] ?? array() );
@@ -250,42 +251,18 @@ class PCL_Query {
 						}
 					}
 				}
-
-				foreach ( $rsets as $rset ) {
-					$type = $rset['type'] ?? '';
-
-					if ( 'RDATE' === $type ) {
-						$occurrence = self::build_rdate_occurrence( $post, $start, $end, $rset['RDATE'] ?? array(), $all_day );
-						if ( $occurrence ) {
-							$event_occurrences[] = $occurrence;
-						}
-					} elseif ( 'RRULE' === $type ) {
-						$event_occurrences = array_merge(
-							$event_occurrences,
-							self::build_rrule_occurrences( $post, $start, $end, $rset['RRULE'] ?? array(), $all_day )
-						);
-					}
-				}
 			}
 
-			// Legacy recurrence: events created with the old "Repeats"
-			// toggle store their rule in these separate fields instead of
-			// _piecal_rsets. Saving the event through the metabox migrates
-			// this into an RRULE-type rset entry and clears this flag, but
-			// an event that hasn't been re-saved since could still be in
-			// this old shape.
-			if ( (bool) get_post_meta( $post->ID, '_piecal_is_recurring', true ) ) {
-				$legacy_rrule = array(
-					'freq'     => get_post_meta( $post->ID, '_piecal_recurring_frequency', true ) ?: 'DAILY',
-					'interval' => get_post_meta( $post->ID, '_piecal_recurring_interval', true ) ?: 1,
-					'exact'    => get_post_meta( $post->ID, '_piecal_recurring_exact_position', true ),
-					'until'    => get_post_meta( $post->ID, '_piecal_recurring_end', true ),
-				);
-				$event_occurrences = array_merge(
-					$event_occurrences,
-					self::build_rrule_occurrences( $post, $start, $end, $legacy_rrule, $all_day )
-				);
-			}
+			// Expand recurrences. Prefer Pie Calendar's own RRuleUtil (the
+			// canonical interpretation of _piecal_rsets, so we never drift from
+			// it); fall back to our built-in expansion if that utility or its
+			// php-rrule dependency isn't available.
+			$event_occurrences = array_merge(
+				$event_occurrences,
+				self::piecal_rrule_util_available()
+					? self::expand_recurrences_via_piecal( $post, $start, $end, $rsets_raw, $all_day )
+					: self::expand_recurrences_fallback( $post, $start, $end, $rsets, $all_day )
+			);
 
 			if ( ! empty( $exclusions ) ) {
 				$event_occurrences = self::exclude_dates( $event_occurrences, $exclusions );
@@ -314,6 +291,126 @@ class PCL_Query {
 		$occurrence->pcl_end     = $end;
 		$occurrence->pcl_all_day = $all_day;
 		return $occurrence;
+	}
+
+	/**
+	 * Whether Pie Calendar's RRuleUtil (and its php-rrule dependency) can be
+	 * used to expand recurrences. Loads the utility file on demand.
+	 */
+	protected static function piecal_rrule_util_available() {
+		if ( ! class_exists( '\Piecal\Utils\RRuleUtil' ) ) {
+			if ( ! defined( 'PIECAL_DIR' ) ) {
+				return false;
+			}
+
+			$file = PIECAL_DIR . '/includes/utils/PiecalRRuleUtil.php';
+			if ( ! file_exists( $file ) ) {
+				return false;
+			}
+
+			require_once $file; // Also pulls in Pie Calendar's Time utility.
+		}
+
+		// RRuleUtil builds an RRule\RSet, so the bundled php-rrule library must
+		// be loaded too. rrule_library_loaded() locates and requires it.
+		return class_exists( '\Piecal\Utils\RRuleUtil' ) && self::rrule_library_loaded();
+	}
+
+	/**
+	 * Expand an event's recurrences using Pie Calendar's own RRuleUtil, so the
+	 * interpretation of _piecal_rsets (RRULE/RDATE/EXDATE/EXRULE + legacy
+	 * fields) always matches Pie Calendar exactly. Returns occurrence posts in
+	 * the same shape as build_occurrence(); the base occurrence is added by the
+	 * caller. Uses appendOffset=false to keep the offset-less datetime format
+	 * the rest of this class expects.
+	 *
+	 * @return WP_Post[]
+	 */
+	protected static function expand_recurrences_via_piecal( $post, $start, $end, $rsets_raw, $all_day ) {
+		$event = array(
+			'start'  => $start,
+			'end'    => ! empty( $end ) ? $end : null,
+			'postId' => $post->ID,
+		);
+
+		$rsets_raw = trim( (string) $rsets_raw );
+		if ( '' !== $rsets_raw ) {
+			$event['rset'] = $rsets_raw;
+		} elseif ( get_post_meta( $post->ID, '_piecal_is_recurring', true ) ) {
+			// Legacy "Repeats" fields map to RRuleUtil's rrule array path.
+			$event['rrule'] = array(
+				'FREQ'     => get_post_meta( $post->ID, '_piecal_recurring_frequency', true ) ?: 'DAILY',
+				'INTERVAL' => intval( get_post_meta( $post->ID, '_piecal_recurring_interval', true ) ) ?: 1,
+				'until'    => get_post_meta( $post->ID, '_piecal_recurring_end', true ) ?: null,
+			);
+		}
+
+		if ( ! isset( $event['rset'] ) && ! isset( $event['rrule'] ) ) {
+			return array();
+		}
+
+		// A list can show events well into the future, so expand across the
+		// full window Pie Calendar itself uses (up to its +2y cutoff); the
+		// caller filters by time and slices afterward.
+		$range_start = '1970-01-01';
+		$range_end   = \Piecal\Utils\RRuleUtil::recurringEventCutoffDate();
+
+		$expanded = \Piecal\Utils\RRuleUtil::expandOccurrencesWithinRange( $event, $range_start, $range_end, false );
+
+		$out = array();
+		foreach ( (array) $expanded as $occ ) {
+			if ( empty( $occ['start'] ) ) {
+				continue;
+			}
+			// Normalize to the offset-less "Y-m-dTH:i" the rest of this class
+			// uses (the util emits seconds). This also lets dedupe collapse the
+			// DTSTART occurrence, which RRuleUtil includes, against the base
+			// occurrence the caller already added.
+			$occ_start = substr( (string) $occ['start'], 0, 16 );
+			$occ_end   = ! empty( $occ['end'] ) ? substr( (string) $occ['end'], 0, 16 ) : $end;
+			$out[]     = self::build_occurrence( $post, $occ_start, $occ_end, $all_day );
+		}
+
+		return $out;
+	}
+
+	/**
+	 * Built-in recurrence expansion, used when Pie Calendar's RRuleUtil isn't
+	 * available. Mirrors the pre-delegation behavior: RDATE/RRULE entries from
+	 * _piecal_rsets plus the legacy "Repeats" fields.
+	 *
+	 * @param array $rsets Decoded _piecal_rsets (or non-array if absent).
+	 * @return WP_Post[]
+	 */
+	protected static function expand_recurrences_fallback( $post, $start, $end, $rsets, $all_day ) {
+		$out = array();
+
+		if ( is_array( $rsets ) ) {
+			foreach ( $rsets as $rset ) {
+				$type = $rset['type'] ?? '';
+
+				if ( 'RDATE' === $type ) {
+					$occurrence = self::build_rdate_occurrence( $post, $start, $end, $rset['RDATE'] ?? array(), $all_day );
+					if ( $occurrence ) {
+						$out[] = $occurrence;
+					}
+				} elseif ( 'RRULE' === $type ) {
+					$out = array_merge( $out, self::build_rrule_occurrences( $post, $start, $end, $rset['RRULE'] ?? array(), $all_day ) );
+				}
+			}
+		}
+
+		if ( (bool) get_post_meta( $post->ID, '_piecal_is_recurring', true ) ) {
+			$legacy_rrule = array(
+				'freq'     => get_post_meta( $post->ID, '_piecal_recurring_frequency', true ) ?: 'DAILY',
+				'interval' => get_post_meta( $post->ID, '_piecal_recurring_interval', true ) ?: 1,
+				'exact'    => get_post_meta( $post->ID, '_piecal_recurring_exact_position', true ),
+				'until'    => get_post_meta( $post->ID, '_piecal_recurring_end', true ),
+			);
+			$out = array_merge( $out, self::build_rrule_occurrences( $post, $start, $end, $legacy_rrule, $all_day ) );
+		}
+
+		return $out;
 	}
 
 	/**
