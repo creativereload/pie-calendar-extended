@@ -7,7 +7,7 @@ Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
 Requires Plugins: pie-calendar
-Stable tag: 0.0.4
+Stable tag: 0.0.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,6 +73,10 @@ standalone plugin, deactivate them before activating this one. The
 keep working.
 
 == Changelog ==
+
+= 0.0.5 =
+* Load more: removed the nonce from the pagination endpoint so the button keeps working on full-page-cached sites (the endpoint only returns public event markup, with attributes re-sanitized and page size capped).
+* Removed the hover underline on the List/Compact/Column event buttons.
 
 = 0.0.4 =
 * Added optional "Load more" pagination to [piecal_layouts] and the block (a new `pagination` attribute / "Enable load-more pagination" toggle). When enabled, the event count becomes the page size and a button appends the next batch via AJAX.
