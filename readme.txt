@@ -7,7 +7,7 @@ Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
 Requires Plugins: pie-calendar
-Stable tag: 0.0.2
+Stable tag: 0.0.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,6 +73,9 @@ standalone plugin, deactivate them before activating this one. The
 keep working.
 
 == Changelog ==
+
+= 0.0.3 =
+* Recurrence occurrences now link with pass-through occurrence data (eventstart/eventend/timezone), matching Pie Calendar's native calendar links, so `[piecal_info]` on the target page shows the clicked occurrence's date instead of the base event's. The original occurrence keeps its clean permalink.
 
 = 0.0.2 =
 * Added a configurable heading level (H2–H6, default H3) for event titles, via a new `heading_level` shortcode attribute and a "Title heading level" control in the block's Layout panel.
