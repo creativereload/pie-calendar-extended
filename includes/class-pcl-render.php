@@ -43,6 +43,25 @@ class PCL_Render {
 	}
 
 	/**
+	 * Render just the per-event item markup for a layout, without the
+	 * `.pcl-wrap` container — used to return additional pages for the
+	 * "load more" pagination so the JS can append them into the existing wrap.
+	 */
+	public static function render_items( $events, $atts ) {
+		$layout = in_array( $atts['layout'], array( 'list', 'compact', 'column' ), true )
+			? $atts['layout']
+			: 'list';
+
+		$method = 'render_' . $layout . '_items';
+
+		if ( ! method_exists( __CLASS__, $method ) ) {
+			$method = 'render_list_items';
+		}
+
+		return self::$method( $events, $atts );
+	}
+
+	/**
 	 * Build an inline `style="--pcl-x:...;"` attribute from any color (or
 	 * other per-instance) overrides the user has set, leaving the rest to
 	 * fall back to the defaults (or a site's own CSS) declared on .pcl-wrap.
@@ -109,7 +128,13 @@ class PCL_Render {
 	 * large thumbnail on the other side, each event in its own card.
 	 */
 	protected static function render_list( $events, $atts, $instance_id ) {
-		$out = '<div id="' . esc_attr( $instance_id ) . '" class="pcl-wrap pcl-layout-list"' . self::style_attr( $atts ) . '>';
+		return '<div id="' . esc_attr( $instance_id ) . '" class="pcl-wrap pcl-layout-list"' . self::style_attr( $atts ) . '>'
+			. self::render_list_items( $events, $atts )
+			. '</div>';
+	}
+
+	protected static function render_list_items( $events, $atts ) {
+		$out = '';
 
 		foreach ( $events as $event ) {
 			$title     = get_the_title( $event );
@@ -153,7 +178,6 @@ class PCL_Render {
 			$out .= '</div>'; // .pcl-list__row
 		}
 
-		$out .= '</div>';
 		return $out;
 	}
 
@@ -164,7 +188,13 @@ class PCL_Render {
 	 * sidebar or newsletter-style feed.
 	 */
 	protected static function render_compact( $events, $atts, $instance_id ) {
-		$out = '<div id="' . esc_attr( $instance_id ) . '" class="pcl-wrap pcl-layout-compact"' . self::style_attr( $atts ) . '>';
+		return '<div id="' . esc_attr( $instance_id ) . '" class="pcl-wrap pcl-layout-compact"' . self::style_attr( $atts ) . '>'
+			. self::render_compact_items( $events, $atts )
+			. '</div>';
+	}
+
+	protected static function render_compact_items( $events, $atts ) {
+		$out = '';
 
 		foreach ( $events as $event ) {
 			$title     = get_the_title( $event );
@@ -202,7 +232,6 @@ class PCL_Render {
 			$out .= '</div>'; // .pcl-compact__row
 		}
 
-		$out .= '</div>';
 		return $out;
 	}
 
@@ -213,7 +242,13 @@ class PCL_Render {
 	 * a button anchored to the bottom.
 	 */
 	protected static function render_column( $events, $atts, $instance_id ) {
-		$out = '<div id="' . esc_attr( $instance_id ) . '" class="pcl-wrap pcl-layout-column"' . self::style_attr( $atts ) . '>';
+		return '<div id="' . esc_attr( $instance_id ) . '" class="pcl-wrap pcl-layout-column"' . self::style_attr( $atts ) . '>'
+			. self::render_column_items( $events, $atts )
+			. '</div>';
+	}
+
+	protected static function render_column_items( $events, $atts ) {
+		$out = '';
 
 		foreach ( $events as $event ) {
 			$title     = get_the_title( $event );
@@ -253,7 +288,6 @@ class PCL_Render {
 			$out .= '</div>'; // .pcl-column__card
 		}
 
-		$out .= '</div>';
 		return $out;
 	}
 
