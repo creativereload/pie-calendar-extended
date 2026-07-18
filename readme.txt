@@ -7,7 +7,7 @@ Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
 Requires Plugins: pie-calendar
-Stable tag: 0.0.5
+Stable tag: 0.0.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,6 +73,9 @@ standalone plugin, deactivate them before activating this one. The
 keep working.
 
 == Changelog ==
+
+= 0.0.6 =
+* Recurrence expansion now delegates to Pie Calendar's own RRuleUtil so occurrence dates always match Pie Calendar exactly, with the previous built-in expansion kept as a fallback when that utility isn't available.
 
 = 0.0.5 =
 * Load more: removed the nonce from the pagination endpoint so the button keeps working on full-page-cached sites (the endpoint only returns public event markup, with attributes re-sanitized and page size capped).
