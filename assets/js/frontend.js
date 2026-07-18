@@ -3,7 +3,7 @@
 
 	// "Load more" pagination for [piecal_layouts]. Delegated so it works for
 	// any number of instances on a page, each button carrying its own target
-	// wrap, page, nonce, ajax URL, and query/render attributes.
+	// wrap, page, ajax URL, and query/render attributes.
 	document.addEventListener( 'click', function ( event ) {
 		var button = event.target.closest( '.pcl-load-more' );
 		if ( ! button ) {
@@ -23,7 +23,6 @@
 
 		var body = new URLSearchParams();
 		body.append( 'action', 'pcl_load_more' );
-		body.append( 'nonce', button.getAttribute( 'data-nonce' ) );
 		body.append( 'atts', button.getAttribute( 'data-atts' ) );
 		body.append( 'page', nextPage );
 

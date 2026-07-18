@@ -3,10 +3,15 @@
  * Handles the "Load more" AJAX request for paginated [piecal_layouts] output.
  *
  * The button (see PCL_Render::load_more_button) posts the query/render
- * attributes, the next page number, and a nonce. We re-sanitize the attributes
- * through the shortcode's own normalizer — the client's values are never
- * trusted — fetch that page, and return just the item markup for the JS to
- * append.
+ * attributes and the next page number. We re-sanitize the attributes through
+ * the shortcode's own normalizer — the client's values are never trusted —
+ * fetch that page, and return just the item markup for the JS to append.
+ *
+ * No nonce is used: this only returns published, public event markup (the same
+ * data the page already shows), so there is nothing to protect against CSRF,
+ * and requiring a nonce would break the button on full-page-cached sites where
+ * the served nonce can be stale. Tampering is contained by re-sanitizing every
+ * attribute and capping the page size (MAX_PER_PAGE).
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -30,8 +35,6 @@ class PCL_Ajax {
 	 * Return the next page of occurrences as item markup + whether more remain.
 	 */
 	public function load_more() {
-		check_ajax_referer( 'pcl_load_more', 'nonce' );
-
 		$raw = array();
 		if ( isset( $_POST['atts'] ) ) {
 			$decoded = json_decode( sanitize_textarea_field( wp_unslash( $_POST['atts'] ) ), true );

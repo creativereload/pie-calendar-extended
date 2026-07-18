@@ -76,9 +76,8 @@ class PCL_Render {
 
 	/**
 	 * The "Load more" button for paginated output. Carries everything the AJAX
-	 * handler needs: the target wrap id, the current page, a nonce, the
-	 * admin-ajax URL, and the query/render attributes. Returns '' when there is
-	 * no further page.
+	 * handler needs: the target wrap id, the current page, the admin-ajax URL,
+	 * and the query/render attributes. Returns '' when there is no further page.
 	 */
 	protected static function load_more_button( $atts, $instance_id, $current_page, $has_more ) {
 		if ( ! $has_more ) {
@@ -93,10 +92,9 @@ class PCL_Render {
 		}
 
 		return sprintf(
-			'<button type="button" class="pcl-load-more" data-target="%1$s" data-page="%2$d" data-nonce="%3$s" data-ajaxurl="%4$s" data-atts="%5$s">%6$s</button>',
+			'<button type="button" class="pcl-load-more" data-target="%1$s" data-page="%2$d" data-ajaxurl="%3$s" data-atts="%4$s">%5$s</button>',
 			esc_attr( $instance_id ),
 			(int) $current_page,
-			esc_attr( wp_create_nonce( 'pcl_load_more' ) ),
 			esc_url( admin_url( 'admin-ajax.php' ) ),
 			esc_attr( (string) wp_json_encode( $ajax_atts ) ),
 			esc_html__( 'Load more', 'pie-calendar-extended' )
