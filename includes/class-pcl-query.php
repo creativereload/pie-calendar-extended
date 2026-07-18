@@ -112,15 +112,67 @@ class PCL_Query {
 	 *                    property attached for convenience.
 	 */
 	public static function get_events( $options = array() ) {
-		$defaults = array(
+		$options     = wp_parse_args( $options, self::default_options() );
+		$occurrences = self::get_all_occurrences( $options );
+
+		$limit = intval( $options['limit'] );
+		if ( $limit > 0 && count( $occurrences ) > $limit ) {
+			$occurrences = array_slice( $occurrences, 0, $limit );
+		}
+
+		return $occurrences;
+	}
+
+	/**
+	 * Default query options shared by the fetch methods.
+	 */
+	protected static function default_options() {
+		return array(
 			'post_type' => '',
 			'post_id'   => 0,
 			'limit'     => 10,
 			'time'      => 'upcoming',
 			'order'     => 'ASC',
 		);
-		$options = wp_parse_args( $options, $defaults );
+	}
 
+	/**
+	 * Fetch one page of occurrences plus whether more remain — for "load more"
+	 * pagination. Uses `per_page` (falling back to `limit`) as the page size and
+	 * `page` (1-based). Because the full sorted list is built anyway, `has_more`
+	 * is computed directly with no extra query.
+	 *
+	 * @param array $options Query options plus optional `per_page` and `page`.
+	 * @return array {
+	 *     @type WP_Post[] $events   Occurrences for this page.
+	 *     @type bool      $has_more Whether a further page exists.
+	 *     @type int       $page     The (clamped) page number returned.
+	 * }
+	 */
+	public static function get_events_page( $options = array() ) {
+		$options  = wp_parse_args( $options, self::default_options() );
+		$per_page = max( 1, intval( isset( $options['per_page'] ) ? $options['per_page'] : $options['limit'] ) );
+		$page     = max( 1, intval( isset( $options['page'] ) ? $options['page'] : 1 ) );
+		$offset   = ( $page - 1 ) * $per_page;
+
+		$all   = self::get_all_occurrences( $options );
+		$total = count( $all );
+
+		return array(
+			'events'   => array_slice( $all, $offset, $per_page ),
+			'has_more' => ( $offset + $per_page ) < $total,
+			'page'     => $page,
+		);
+	}
+
+	/**
+	 * Expand every matching event into its occurrences, filtered by time and
+	 * sorted — the full unpaged list shared by get_events / get_events_page.
+	 *
+	 * @param array $options Already parsed against default_options().
+	 * @return WP_Post[]
+	 */
+	protected static function get_all_occurrences( $options ) {
 		$start_meta_key = apply_filters( 'piecal_start_date_meta_key', '_piecal_start_date' );
 		$end_meta_key   = apply_filters( 'piecal_end_date_meta_key', '_piecal_end_date' );
 		$rsets_meta_key = apply_filters( 'piecal_rsets_meta_key', '_piecal_rsets' );
@@ -246,11 +298,6 @@ class PCL_Query {
 
 		$occurrences = self::filter_by_time( $occurrences, $options['time'] );
 		$occurrences = self::sort_by_start( $occurrences, $options['order'] );
-
-		$limit = intval( $options['limit'] );
-		if ( $limit > 0 && count( $occurrences ) > $limit ) {
-			$occurrences = array_slice( $occurrences, 0, $limit );
-		}
 
 		return $occurrences;
 	}
