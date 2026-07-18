@@ -21,8 +21,17 @@ class PCL_Shortcode {
 	 * [piecal_layouts post_id="425" time="upcoming"] (only that event's occurrences)
 	 */
 	public function render( $atts ) {
-		$atts = self::normalize_atts( $atts );
+		return self::render_events( self::normalize_atts( $atts ) );
+	}
 
+	/**
+	 * Fetch and render events for a set of already-normalized attributes. Shared
+	 * by the shortcode and the block so both honor pagination identically.
+	 *
+	 * @param array $atts Attributes from self::normalize_atts().
+	 * @return string HTML.
+	 */
+	public static function render_events( $atts ) {
 		$query_args = array(
 			'post_type' => $atts['post_type'],
 			'post_id'   => $atts['post_id'],

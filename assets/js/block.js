@@ -152,6 +152,7 @@
 			excerptLength: { type: 'number', default: 20 },
 			linkText: { type: 'string', default: __( 'View Event', 'pie-calendar-layouts' ) },
 			showButton: { type: 'boolean', default: true },
+			pagination: { type: 'boolean', default: false },
 			headingLevel: { type: 'string', default: 'h3' },
 			columns: { type: 'number', default: 3 },
 			cardBorderWidth: { type: 'number' },
@@ -349,7 +350,15 @@
 								onChange: function ( value ) {
 									setAttributes( { linkText: value } );
 								},
-							} )
+							} ),
+						el( ToggleControl, {
+							label: __( 'Enable load-more pagination', 'pie-calendar-layouts' ),
+							checked: attributes.pagination,
+							onChange: function ( value ) {
+								setAttributes( { pagination: value } );
+							},
+							help: __( 'When on, the event count becomes the page size and a Load more button appends the next batch.', 'pie-calendar-layouts' ),
+						} )
 					)
 				),
 				// Styles tab (the "styles" InspectorControls group). Grouped

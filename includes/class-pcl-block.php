@@ -96,6 +96,10 @@ class PCL_Block {
 						'type'    => 'boolean',
 						'default' => true,
 					),
+					'pagination'    => array(
+						'type'    => 'boolean',
+						'default' => false,
+					),
 					'headingLevel'  => array(
 						'type'    => 'string',
 						'default' => 'h3',
@@ -201,6 +205,7 @@ class PCL_Block {
 			'excerpt_length' => $block_attrs['excerptLength'] ?? 20,
 			'link_text'      => $block_attrs['linkText'] ?? __( 'View Event', 'pie-calendar-extended' ),
 			'show_button'        => ! isset( $block_attrs['showButton'] ) || ! empty( $block_attrs['showButton'] ) ? 'yes' : 'no',
+			'pagination'         => ! empty( $block_attrs['pagination'] ) ? 'yes' : 'no',
 			'heading_level'      => $block_attrs['headingLevel'] ?? 'h3',
 			'columns'            => $block_attrs['columns'] ?? 3,
 			'card_border_width'    => $block_attrs['cardBorderWidth'] ?? '',
@@ -240,16 +245,6 @@ class PCL_Block {
 
 		$atts = PCL_Shortcode::normalize_atts( $mapped );
 
-		$events = PCL_Query::get_events(
-			array(
-				'post_type' => $atts['post_type'],
-				'post_id'   => $atts['post_id'],
-				'limit'     => $atts['limit'],
-				'time'      => $atts['time'],
-				'order'     => $atts['order'],
-			)
-		);
-
-		return PCL_Render::render( $events, $atts );
+		return PCL_Shortcode::render_events( $atts );
 	}
 }
